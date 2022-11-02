@@ -17,6 +17,7 @@ db.once('open', function () {
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 
@@ -28,11 +29,34 @@ app.get('/test', (request, response) => {
 
 app.get('/books', getBooks);
 
+app.post('/books', postBooks);
+
+app.delete('/books/:id', deleteBooks);
+
 async function getBooks(request, response, next) {
   try {
     let results = await Book.find();
 
     response.status(200).send(results);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function postBooks(request, response, next) {
+  try {
+    let createdBook = await Book.create(request.body);
+    response.status(200).send(createdBook);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function deleteBooks(request, response, next) {
+  try {
+    let id = request.params.id;
+    await Book.findByIdAndDelete(id);
+    response.status(200).send('Book was deleted');
   } catch (error) {
     next(error);
   }
